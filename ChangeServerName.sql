@@ -2,7 +2,7 @@
 IF COALESCE(@@SERVERNAME, '') <>  COALESCE(SERVERPROPERTY('SeverName'), '')
 BEGIN
 	EXEC sp_dropserver @@SERVERNAME
-	EXEC sp_addserver N'X3VCDBJDAN2\X3V6', local
+	EXEC sp_addserver N'<Server Instance Name, VARCHAR(256), ServerName\InstanceName>', local
 END
 
 
