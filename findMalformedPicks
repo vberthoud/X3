@@ -25,12 +25,12 @@ DECLARE @myRowCount		INT,
 		@myNewID		UNIQUEIDENTIFIER,
 		@err			VARCHAR(255)
 		
-SET @fullEmailList = 'bob.delamater@sage.com;pam.nightingale@sage.com;'
+SET @fullEmailList = 'bob.delamater@sage.com;pam.nightingale@sage.com'
 SET @myNewID = NEWID()
 
 /****************************  Sanity checks ********************************/
 USE x3v6
-
+--drop table ECCPROD.ZMalformedPickLog
 
 -- If the log table does not exist, create it
 IF OBJECT_ID('ECCPROD.ZMalformedPickLog', 'U') IS NULL
@@ -51,13 +51,14 @@ BEGIN
 		StockLot					NVARCHAR(34) NULL,
 		StockLoc					NVARCHAR(20) NULL,
 		StockLOCTYP					NVARCHAR(10) NULL,
-		StockQTYPCU					NVARCHAR(13) NULL,
-		StockQTYSTU					NVARCHAR(13) NULL,
-		StockQTYSTUACT				NVARCHAR(13) NULL,
+		StockQTYPCU					NUMERIC(28, 13) NULL,
+		StockQTYSTU					NUMERIC(28, 13) NULL,
+		StockQTYSTUACT				NUMERIC(28, 13) NULL,
 		StockCUMALLQTY				NUMERIC(28, 13) NULL,
 		StockCUMWIPQTY				NUMERIC(28, 13) NULL,
 		StockCUMWIPQTA				NUMERIC(28, 13) NULL,
 		StockLASRCPDAT				DATETIME NULL,
+
 		StowipWIPQTY				NUMERIC(28, 13) NULL,
 		StowipWIPQTA				NUMERIC(28, 13) NULL,
 		StowipCREDAT				DATETIME NULL,
@@ -101,8 +102,10 @@ INSERT INTO ECCPROD.ZMalformedPickLog(
 		StockSTOFCY,StockSTOCOU, StockLot,
 		StockLoc, StockLOCTYP, StockQTYPCU, StockQTYSTU, 
 		StockQTYSTUACT, StockCUMALLQTY, StockCUMWIPQTY, 
-		StockCUMWIPQTA,	StockLASRCPDAT, StowipWIPQTY,
-		StowipWIPQTA, StowipCREDAT, StowipCREUSR, 
+		StockCUMWIPQTA,	StockLASRCPDAT, 
+		
+		StowipWIPQTY, StowipWIPQTA, StowipCREDAT, StowipCREUSR, 
+		
 		StoallCreateUser, StoallCreateDate, StoallUpdateUser, 
 		StoallUpdateDate, StoallLocationShortage, StoallStockQuantity, 
 		StoallActiveStockQuantity, StoallSequence, StoallShortageStatus, 
@@ -112,7 +115,7 @@ INSERT INTO ECCPROD.ZMalformedPickLog(
 		HeaderUpdateUser, DetailCreateDate,	DetailCreateUser, DetailUpdateDate, 
 		DetailUpdateUser, HeaderRowID, DetailRowID,	YDOCK_0,
 		InsertGUID, LogDate)			
-SELECT TOP 1
+SELECT 
 		i.ITMREF_0,
 		ph.PRHNUM_0, 
 		pd.ORINUM_0, 
@@ -177,10 +180,11 @@ FROM ECCPROD.STOPREH ph
 		ON s.STOFCY_0 = sa.STOFCY_0
 		AND s.ITMREF_0 = s.ITMREF_0
 		AND s.STOCOU_0 = sa.STOCOU_0
---WHERE 
---	pd.QTYSTU_0 <> pd.ALLQTY_0
---	AND ph.DLVFLG_0 IN(2)  -- Deliverable status
---	AND ph.PRHNUM_0 <> 'P0508-E0000557' -- Malformed prep (customer not interested in this prep, discarded results)
+WHERE 
+	pd.QTYSTU_0 <> pd.ALLQTY_0		-- Original condition, replaced by the next line
+	--(pd.ALLQTY_0 + SHTQTY_0) <> pd.QTYSTU_0 -- Potential revised logic, not in production yet
+	AND ph.DLVFLG_0 IN(1,2)  -- In Process or Deliverable status
+	AND ph.PRHNUM_0 <> 'P0508-E0000557' -- Malformed prep (customer not interested in this prep, discarded results)
 ORDER BY ph.ROWID DESC
 
 SET @myRowCount = @@ROWCOUNT
