@@ -25,7 +25,7 @@ DECLARE @myRowCount		INT,
 		@myNewID		UNIQUEIDENTIFIER,
 		@err			VARCHAR(255)
 		
-SET @fullEmailList = 'bob.delamater@sage.com;pam.nightingale@sage.com'
+SET @fullEmailList = 'bob.delamater@sage.com;pam.nightingale@sage.com;'
 SET @myNewID = NEWID()
 
 /****************************  Sanity checks ********************************/
@@ -165,7 +165,7 @@ SELECT
 		ph.ROWID HeaderRowID, 
 		pd.ROWID DetailRowID,
 		ph.YDOCK_0,
-		NEWID(),
+		@myNewID,
 		GETDATE() InsertDate
 FROM ECCPROD.STOPREH ph
 	INNER JOIN ECCPROD.STOPRED pd
