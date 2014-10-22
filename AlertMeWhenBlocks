@@ -118,7 +118,7 @@ SET @myRowCount = @@ROWCOUNT
 IF @myRowCount > 0
 BEGIN
 	SET @myBody = 'The ECCPROD.ZBlockedProcessAlerts table has been loaded with data. Please run the following query to get these results:'  
-	+ CHAR(13) + 'SELECT * FROM ECCPROD.ZBlockedProcessAlerts WHERE InsertGUID = ''' + CONVERT(VARCHAR(40), @InsertGUID) + ''''
+	+ CHAR(13) + 'SELECT * FROM x3v6.ECCPROD.ZBlockedProcessAlerts WHERE InsertGUID = ''' + CONVERT(VARCHAR(40), @InsertGUID) + ''''
 	USE msdb
 	PRINT 'Sending results via DB Mail'
 	EXEC msdb.dbo.sp_send_dbmail 
