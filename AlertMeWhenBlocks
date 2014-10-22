@@ -7,7 +7,7 @@ DECLARE @fullEmailList VARCHAR(MAX),
 		@myRowCount INT,
 		@myBody VARCHAR(MAX)
 
-SET @fullEmailList = 'bob.delamater@sage.com;pam.nightingale@sage.com;lynne.adamson@sage.com'
+SET @fullEmailList = 'bob.delamater@sage.com;pam.nightingale@sage.com'
 SET @InsertGUID = NEWID()
 SET @InsertDate = GETDATE()
 
