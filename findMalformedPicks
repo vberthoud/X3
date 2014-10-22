@@ -178,7 +178,7 @@ FROM ECCPROD.STOPREH ph
 		ON s.STOCOU_0 = sw.STOCOU_0
 	LEFT JOIN ECCPROD.STOALL sa
 		ON s.STOFCY_0 = sa.STOFCY_0
-		AND s.ITMREF_0 = s.ITMREF_0
+		AND s.ITMREF_0 = sa.ITMREF_0
 		AND s.STOCOU_0 = sa.STOCOU_0
 WHERE 
 	pd.QTYSTU_0 <> pd.ALLQTY_0		-- Original condition, replaced by the next line
