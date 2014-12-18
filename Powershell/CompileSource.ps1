@@ -11,17 +11,19 @@ try{
 [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.VisualBasic') | Out-Null
 $envPath = [Microsoft.VisualBasic.Interaction]::InputBox("What is the path to the env.bat file?", "Path to Env.bat", "C:\SAGE\SAGEX3V6\X3V6\runtime\bin")
 $batchFileOutput = [Microsoft.VisualBasic.Interaction]::InputBox("Where would you like to store the batch file?", "Path to batch file", "C:\Sage\CompileSource.bat")
-$trtDir = "C:\SAGE\SAGEX3V6\X3V6\Folders\DEMO\TRT"
-$myFilter = "ZSTKALL.src"
+$trtDir = [Microsoft.VisualBasic.Interaction]::InputBox("Where is the TRT directory?", "Path to TRT direcotry file", "C:\SAGE\SAGEX3V6\X3V6\Folders\DEMO\TRT") 
+$myFilter = [Microsoft.VisualBasic.Interaction]::InputBox("File filter", "Set File Filter", "Z*.src") 
 
-Set-Content -Value "$envPath\env.bat" -Path $batchFileOutput
+Set-Content -Value "CALL $envPath\env.bat" -Path $batchFileOutput
 
 Get-ChildItem -Path $trtDir -Filter $myFilter |
 ForEach-Object{
-	$fileName = $_.name
+	$fileName = $_.BaseName
 	$cmd = "$envPath\valtrt.exe -l ENG DEMO $fileName "
 	Add-Content -Value $cmd -Path $batchFileOutput
 }
+
+Add-Content -Value "Pause" -Path $batchFileOutput
 
 #$cmd = "$envPath\valtrt.exe -l ENG DEMO ZSTKALL"
 
