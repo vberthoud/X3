@@ -1,0 +1,37 @@
+# This ZZWSSOH.src file serves to allow you to debug your SOH web service published object 
+# The code below is the equivalent of passing the following XML to your 
+# Web service within the Sage ERP X3 web service testing harness
+
+#<PARAM>
+#	<TAB ID="SOH4_1" >
+#		<LIN NUM="1" >
+#			<FLD NAME="DSHIDAT" >20141204</FLD>
+#		</LIN>
+#	</TAB>
+#</PARAM>
+
+
+#Initialize variable values here
+$INITMAJ
+
+WW_ACTION = "MODIFY"      : # READ, CREATE, MODIFY, DELETE, SUPLIG, INSLIG
+WW_IDENT  = "SOI000004"          : # Clé de l Objet Val1~Val2 
+
+# Number of lines on the grid
+NBLIG_2 = 1
+
+#Index of the line within the grid
+NUMLIG_2(0) = 1
+
+#Set the Delivery Ship date to some value
+DSHIDAT_2(0) = "20141203"
+
+Return
+
+
+# Show results on the trace log
+$RESMAJ
+
+Call ECR_TRACE("DSHIDAT: " + DSHIDAT_2(0),0) From GESECRAN
+
+Return
