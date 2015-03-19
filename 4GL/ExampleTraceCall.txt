@@ -1,0 +1,12 @@
+# Support's technique for logging
+Subprog XLOG(MYTEXT)
+Value Char MYTEXT
+
+Openo filpath("tmp","XWIPLOG3","log") Using [XLOG]
+Wrseq "Ouvre section" Using [XLOG]
+Wrseq format$("D:YYYY[/]MM[/]DD",date$); Using [XLOG]
+Openo Using [XLOG]
+
+End
+
+Call XLOG("Before OUVRE"-GUSER)
