@@ -1,0 +1,129 @@
+IF OBJECT_ID('dbo.uspProdTrackDetails2', 'p') IS NOT NULL
+BEGIN
+	PRINT 'Recreating Procedure uspProdTrackDetails2'
+	DROP PROCEDURE dbo.uspProdTrackDetails2  
+END
+GO
+CREATE PROCEDURE uspProdTrackDetails2 
+	@CREDAT DATETIME, 
+	@WorkOrder NVARCHAR(40) = NULL
+
+AS
+
+SELECT 
+	'Track with missing MAT, OPE and ITM Records' MissingRecords, 
+	ht.MFGNUM_0, 
+	ht.MFGTRKNUM_0 TrackingNumber, 
+	ht.ITMTRKFLG_0, 
+	itm.MFGTRKNUM_0 Itm_MFGTRKNUM, 
+	mat.MFGTRKNUM_0 Mat_MFGTRKNUM,
+	ope.MFGTRKNUM_0 Ope_MFGTRKNUM,
+	ht.CREDAT_0
+INTO #Trk
+FROM ECCPROD2.MFGHEADTRK ht
+	LEFT JOIN ECCPROD2.MFGITMTRK itm
+		ON ht.MFGTRKNUM_0 = itm.MFGTRKNUM_0
+	LEFT JOIN ECCPROD2.MFGMATTRK mat
+		ON ht.MFGTRKNUM_0 = mat.MFGTRKNUM_0
+	LEFT JOIN ECCPROD2.MFGOPETRK ope
+		ON ht.MFGTRKNUM_0 = ope.MFGTRKNUM_0
+WHERE 
+	(itm.MFGTRKNUM_0 IS NULL AND mat.MFGTRKNUM_0 IS NULL AND ope.MFGTRKNUM_0 IS NULL)
+	AND ht.CREDAT_0 >= @CREDAT 
+	--AND (ITMTRKFLG_0 = 2 or MATTRKFLG_0 = 2 or OPETRKFLG_0 = 2)
+ORDER BY ht.ROWID DESC
+
+PRINT 'Suspect trackings'
+SELECT * 
+FROM #Trk
+
+-- Missing STOJOU offset records
+SELECT 'True' MissingStojouOffsetRecords, SUM(QTYSTU_0) SumQtyStu, VCRNUMORI_0
+FROM ECCPROD2.STOJOU s
+WHERE 
+	VCRNUMORI_0 IN 
+		(SELECT DISTINCT MFGNUM_0 FROM #Trk)
+		AND TRSTYP_0 IN(5)
+GROUP BY VCRNUMORI_0
+HAVING SUM(QTYSTU_0) <> 0
+ORDER BY VCRNUMORI_0 DESC
+
+
+-- Broken WIP Cost Inquiry
+SELECT 'True' BrokenWipCostInquiry, w.VCRNUM_0, SUM(w.QTY_0) SumWipCost
+FROM ECCPROD2.WIPCOST w
+WHERE 
+	w.TXNTYP_0 = 14
+	AND w.VCRNUM_0 IN (SELECT DISTINCT MFGNUM_0 FROM #Trk)
+	--
+GROUP BY VCRNUM_0
+HAVING SUM(w.QTY_0) <> (SELECT CPLQTY_0 FROM ECCPROD2.MFGHEAD h WHERE h.MFGNUM_0 = w.VCRNUM_0)
+
+
+
+SELECT 
+	
+	s.QTYSTU_0, 
+	t.TrackingNumber, 
+	s.VCRNUMORI_0, 
+	s.VCRNUM_0, 
+	s.ITMREF_0, 
+	s.TRSTYP_0, 
+	lm.LANMES_0
+INTO #sto
+FROM ECCPROD2.STOJOU s
+	INNER JOIN #Trk t
+		ON s.VCRNUMORI_0 = t.MFGNUM_0
+		AND s.VCRNUM_0 = t.TrackingNumber
+	INNER JOIN ECCPROD.APLSTD lm
+		ON s.TRSTYP_0 = lm.LANNUM_0
+		AND lm.LANCHP_0 = 704
+		AND lm.LAN_0 = 'ENG'	
+ORDER BY t.TrackingNumber
+
+PRINT 'STOJOU Output For Problem Records'
+IF @WorkOrder  IS NOT NULL
+BEGIN
+	SELECT 'STOJOU Problems - Detail' Stojou_Details, * 
+	FROM #sto
+	WHERE VCRNUMORI_0 = @WorkOrder 
+	ORDER BY VCRNUMORI_0 DESC
+	
+	SELECT 
+		'Incorrect STOJOU Sum' IncorrectStojouRecords, 
+		SUM(QTYSTU_0) SumQtyStu, 
+		--TrackingNumber, 
+		VCRNUMORI_0
+	FROM #sto
+	GROUP BY VCRNUMORI_0
+	HAVING SUM(QTYSTU_0) <> 0
+	AND VCRNUMORI_0 = @WorkOrder 
+END
+ELSE
+BEGIN
+	SELECT 'STOJOU Problems - Detail' Stojou_Details, * 
+	FROM #sto
+	ORDER BY VCRNUMORI_0 DESC
+	
+	SELECT 
+		'Incorrect STOJOU Sum' IncorrectStojouRecords, 
+		SUM(QTYSTU_0) SumQtyStu, 
+		--TrackingNumber, 
+		VCRNUMORI_0
+	FROM #sto
+	GROUP BY VCRNUMORI_0
+	HAVING SUM(QTYSTU_0) <> 0
+	ORDER BY VCRNUMORI_0 DESC
+	
+END
+
+--select SUM(QTYSTU_0), VCRNUMORI_0
+--from ECCPROD2.STOJOU 
+--where VCRNUMORI_0 = 'W002772'
+--and TRSTYP_0 = 5
+--group by VCRNUMORI_0
+
+--select QTYSTU_0, VCRNUMORI_0, *
+--from ECCPROD2.STOJOU 
+--where VCRNUMORI_0 = 'W002772'
+--and TRSTYP_0 = 5
