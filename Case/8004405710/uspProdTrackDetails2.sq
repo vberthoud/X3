@@ -46,7 +46,7 @@ WHERE
 		AND TRSTYP_0 IN(5)
 GROUP BY VCRNUMORI_0
 HAVING SUM(QTYSTU_0) <> 0
-ORDER BY VCRNUMORI_0 DESC
+ORDER BY VCRNUMORI_0 DESC	
 
 
 -- Broken WIP Cost Inquiry
@@ -84,37 +84,11 @@ ORDER BY t.TrackingNumber
 PRINT 'STOJOU Output For Problem Records'
 IF @WorkOrder  IS NOT NULL
 BEGIN
-	SELECT 'STOJOU Problems - Detail' Stojou_Details, * 
-	FROM #sto
+	SELECT 'STOJOU Problems - Detail' Stojou_Details, QTYSTU_0, VCRNUMORI_0, VCRNUM_0, TRSTYP_0 
+	FROM ECCPROD2.STOJOU
 	WHERE VCRNUMORI_0 = @WorkOrder 
+	--AND TRSTYP_0 = 5
 	ORDER BY VCRNUMORI_0 DESC
-	
-	SELECT 
-		'Incorrect STOJOU Sum' IncorrectStojouRecords, 
-		SUM(QTYSTU_0) SumQtyStu, 
-		--TrackingNumber, 
-		VCRNUMORI_0
-	FROM #sto
-	GROUP BY VCRNUMORI_0
-	HAVING SUM(QTYSTU_0) <> 0
-	AND VCRNUMORI_0 = @WorkOrder 
-END
-ELSE
-BEGIN
-	SELECT 'STOJOU Problems - Detail' Stojou_Details, * 
-	FROM #sto
-	ORDER BY VCRNUMORI_0 DESC
-	
-	SELECT 
-		'Incorrect STOJOU Sum' IncorrectStojouRecords, 
-		SUM(QTYSTU_0) SumQtyStu, 
-		--TrackingNumber, 
-		VCRNUMORI_0
-	FROM #sto
-	GROUP BY VCRNUMORI_0
-	HAVING SUM(QTYSTU_0) <> 0
-	ORDER BY VCRNUMORI_0 DESC
-	
 END
 
 --select SUM(QTYSTU_0), VCRNUMORI_0
