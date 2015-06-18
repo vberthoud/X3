@@ -101,3 +101,4 @@ END
 --from ECCPROD2.STOJOU 
 --where VCRNUMORI_0 = 'W002772'
 --and TRSTYP_0 = 5
+
