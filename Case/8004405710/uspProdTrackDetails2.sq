@@ -38,7 +38,7 @@ SELECT *
 FROM #Trk
 
 -- Missing STOJOU offset records
-SELECT 'True' MissingStojouOffsetRecords, SUM(QTYSTU_0) SumQtyStu, VCRNUMORI_0
+SELECT 'True' PotentialIncorrectStojouOffsetRecords, SUM(QTYSTU_0) SumQtyStu, VCRNUMORI_0
 FROM ECCPROD.STOJOU s
 WHERE 
 	VCRNUMORI_0 IN 
